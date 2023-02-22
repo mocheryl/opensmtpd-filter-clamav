@@ -1,0 +1,133 @@
+.\" $Id: filter-clamav.1 46 2019-11-15 22:31:43Z umaxx $
+.\" Copyright (c) 2019 Joerg Jung <mail@umaxx.net>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.Dd November 15, 2019
+.Dt FILTER-CLAMAV 1
+.Os
+.Sh NAME
+.Nm filter-clamav
+.Nd smtpd filter for Clam AntiVirus clamd
+.Sh SYNOPSIS
+.Nm
+.Op Ar address
+.Nm
+.Cm version
+.Sh DESCRIPTION
+.Nm
+is a filter for
+.Xr smtpd 8
+which can be used to filter mails based on the decisions from Clam AntiVirus's
+.Xr clamd 8
+daemon.
+Mails are piped to the daemon, which scans the mail for viruses.
+.Pp
+The arguments are as follows:
+.Bl -tag -width "version"
+.It Ar address
+Optionally set the
+.Ar address
+that Clam AntiVirus's
+.Xr clamd 8
+listens on.
+Default value: localhost:3310.
+.It Cm version
+Print the
+.Cm version
+and copyright information of
+.Nm
+to the standard output, then exit.
+.El
+.Pp
+.Nm
+is supposed to be started as filter with
+.Xr smtpd 8 .
+With
+.Nm
+enabled,
+.Xr smtpd 8
+rejects mails which contain a virus with a SMTP 554 reply.
+Non-virus mails are accepted.
+.Sh CLAM ANTIVIRUS CONFIGURATION
+The default
+.Nm
+configuration expects Clam AntiVirus'
+.Xr clamd 8
+to listen on localhost port 3310 for incoming requests.
+This requires to uncomment the
+.Sy TCPAddr
+and
+.Sy TCPSocket
+option in the
+.Xr clamd.conf 5
+default configuration of the daemon.
+.Pp
+The
+.Sy smtp max-message-size
+option in
+.Xr smtpd.conf 5
+should not exceed the
+.Sy StreamMaxLength
+option from
+.Xr clamd.conf 5 ,
+to avoid failed scans due to the stream limit being reached.
+Thus the default
+.Xr clamd 8
+configuration for
+.Sy StreamMaxLength
+needs to be increased.
+.Sh EXIT STATUS
+.Ex -std
+.Sh EXAMPLES
+Start
+.Nm
+connecting to clamd running on another host:
+.Bd -literal -offset indent
+$ filter-clamav clamd.example.net:3310
+.Ed
+.Pp
+Print
+.Cm version
+and copyright information of
+.Nm
+to the standard output stream and exit successfully:
+.Bd -literal -offset indent
+$ filter-clamav version
+.Ed
+.Sh SEE ALSO
+.Xr clamd.conf 5 ,
+.Xr smtpd.conf 5 ,
+.Xr clamd 8 ,
+.Xr smtpd 8
+.Sh STANDARDS
+.Rs
+.%A J. Klensin
+.%D October 2008
+.%R RFC 5321
+.%T Simple Mail Transfer Protocol
+.Re
+.Sh HISTORY
+The first version of
+.Nm
+appeared back in November 2019.
+.Sh AUTHORS
+.An -nosplit
+.Nm
+was written by
+.An Joerg Jung Aq Mt mail@umaxx.net .
+.Sh CAVEATS
+Messages containing a virus can not be accepted.
+.Pp
+Scanning through a Unix domain socket is not yet supported.
+.Sh HOMEPAGE
+.Lk https://www.umaxx.net/

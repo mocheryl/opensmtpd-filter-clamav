@@ -1,0 +1,23 @@
+
+
+				 filter-clamav
+
+   Documentation and description of usage, can be found in
+   filter-clamav(1) manual page.
+
+Installation Requirements
+
+   Go and Make are needed to build and install filter-clamav.
+   Supported platforms are Linux and OpenBSD.
+
+Installation from Source
+
+   Extract and install filter-clamav:
+
+    # tar xzf filter-clamav-n.n.tar.gz
+    # cd filter-clamav-n.n/
+    # make
+
+  Install filter-clamav:
+
+    # make install
