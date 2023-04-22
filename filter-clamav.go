@@ -29,9 +29,13 @@ import (
 )
 
 const (
-	v  = "0.5"
+	v  = "0.5+p0"
 	yr = "2019-2020"
 )
+
+type closeWriter interface {
+	CloseWrite() error
+}
 
 type clamav struct {
 	sid string
@@ -82,7 +86,11 @@ func (cl *clamav) response(tok string, in *bufio.Scanner) {
 }
 
 func (cl *clamav) process(tok string) {
-	con, e := net.Dial("tcp", addr) // todo: support "unix" if addr[0] == '/'
+	netw := `tcp`
+	if addr[0] == '/' {
+		netw = `unix`
+	}
+	con, e := net.Dial(netw, addr)
 	if e != nil {
 		l3.Err(fmt.Sprintln(cl.sid, e))
 		cl.reset(tok)
@@ -109,7 +117,7 @@ func (cl *clamav) process(tok string) {
 		cl.reset(tok)
 		return
 	}
-	if c, ok := con.(*net.TCPConn); ok {
+	if c, ok := con.(closeWriter); ok {
 		if e = c.CloseWrite(); e != nil {
 			l3.Warning(fmt.Sprintln(cl.sid, "closewrite", e))
 		}
