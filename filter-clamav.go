@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	v  = "0.5+p0"
+	v  = "0.5+p1"
 	yr = "2019-2020"
 )
 
@@ -213,14 +213,34 @@ func init() {
 func main() {
 	var e error
 	if len(os.Args) == 2 && os.Args[1] == "version" {
+		if err := pledgePromises("stdio", "unveil"); err != nil {
+			log.Fatalf("Could not pledge promise: %s\n", err)
+		}
+		if err := unveilAndBlock(); err != nil {
+			log.Fatalf("Could not unveil and block: %s\n", err)
+		}
+
 		fmt.Println("filter-clamav", v, "(c)", yr, "Joerg Jung")
 		return
+	}
+	if err := pledgePromises("stdio", "inet", "dns", "unix", "unveil"); err != nil {
+		log.Fatalf("Could not pledge promise: %s\n", err)
 	}
 	if len(os.Args) > 2 {
 		log.Fatalf("usage: filter-clamav [<address>]\n%35sfilter-clamav version\n", "")
 	}
 	if len(os.Args) == 2 {
 		addr = os.Args[1]
+	}
+	u := []string{"/dev/log"}
+	if addr[0] == '/' {
+		u = append(u, addr)
+	}
+	if err := unveilReadWrite(u...); err != nil {
+		log.Fatalf("Could not unveil for reading and writing: %s\n", err)
+	}
+	if err := unveilAndBlock("/etc/resolv.conf", "/etc/hosts"); err != nil {
+		log.Fatalf("Could not unveil and block: %s\n", err)
 	}
 	if l3, e = syslog.New(syslog.LOG_MAIL, "filter-clamav"); e != nil {
 		log.Fatal(e)
