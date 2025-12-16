@@ -1,5 +1,5 @@
-// $Id: filter-clamav.go 60 2020-04-17 22:58:34Z umaxx $
-// Copyright (c) 2019-2020 Joerg Jung <mail@umaxx.net>
+// $Id: filter-clamav.go 66 2024-04-14 16:44:05Z umaxx $
+// Copyright (c) 2019-2024 Joerg Jung <mail@umaxx.net>
 //
 // Permission to use, copy, modify, and distribute this software for any
 // purpose with or without fee is hereby granted, provided that the above
@@ -29,8 +29,8 @@ import (
 )
 
 const (
-	v  = "0.5+p1"
-	yr = "2019-2020"
+	v  = "0.6+p0"
+	yr = "2019-2024"
 )
 
 type closeWriter interface {
@@ -176,7 +176,7 @@ func run() {
 	for in.Scan() {
 		f := strings.Split(in.Text(), "|")
 		t, ver, ev, sid := f[0], f[1], f[4], f[5]
-		if (t != "filter" && t != "report") || ver != "0.6" {
+		if (t != "filter" && t != "report") || ver != "0.7" {
 			l3.Err(fmt.Sprintln(sid, "protocol", t, ver))
 			return
 		}
